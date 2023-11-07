@@ -14,6 +14,8 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+from playwright.sync_api import sync_playwright
+from playwright.sync_api import Page, BrowserContext
 
 load_dotenv()
 
@@ -52,23 +54,31 @@ chrome_options.add_argument("--disable-infobars")
 # Abrir o Chrome
 url = os.getenv("URL")
 browser = webdriver.Chrome(options=chrome_options)
-url = url  # Substitua pelo URL desejado
+#url = url  # Substitua pelo URL desejado
 browser.get(url)
 wait = WebDriverWait(browser, 30)
 
-time.sleep(20)
+WebDriverWait(browser, 60).until(EC.text_to_be_present_in_element((By.TAG_NAME, 'body'), 'Que bom te ver por aqui!'))
+
+time.sleep(2)
 pyautogui.click(960,596,duration=0.2)
 
 
-# Clique no elemento
-
 for linha in sheet_produtos.iter_rows(min_row=2, values_only=True):
 
-    element = wait.until(EC.visibility_of_element_located((By.ID, 'email'))).send_keys(linha[0])
-    element = wait.until(EC.visibility_of_element_located((By.ID, 'senha'))).send_keys(linha[1])
-    elemento_submit = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@translate="@APP-LOGIN-ENTRAR"]'))).click()
-    elemento_submit = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[translate="@APP-COMMON-ENTRAR""]'))).click()
+    login = wait.until(EC.visibility_of_element_located((By.ID, 'email'))).send_keys(linha[0])
+    password = wait.until(EC.visibility_of_element_located((By.ID, 'senha'))).send_keys(linha[1])
+    button_entrar = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@translate="@APP-LOGIN-ENTRAR"]'))).click()
+    
+    button_entrar = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@translate="@APP-COMMON-ENTRAR"]'))).click()
     #Continuar daqui para baixo, implementar logica as filiais
+
+    valida_referencia = wait.until(EC.presence_of_element_located((By.XPATH, '//*[contains(@translate, "@APP-PORTAL-CARD-CONTA-ATUAL-VENCIMENTO-REFERENTE")]'))).text
+    print(valida_referencia)
+
+    valida_status = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[contains(@ng-bind, "$ctrl.portal.contaAtual.situacao")]'))).text
+    print(valida_status)
+
     hora_minuto = datetime.datetime.now().strftime('%H:%M')
     nome_relatorio = "Relatório de execução " + mes_ano +".xlsx"
 
